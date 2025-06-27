@@ -309,3 +309,32 @@ class Database:
         except Exception as e:
             LogPerformance().error(f"Erro ao buscar usuários autorizados: {e}")
             return []
+
+    def get_summary_users(self) -> List[Dict]:
+        """Retorna resumo de usuários"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    """
+                    SELECT user_id, user_name, user_full_name
+                    FROM queries
+                    GROUP BY user_id
+                    ORDER BY user_id DESC
+                    """
+                )
+
+                results = []
+                for row in cursor.fetchall():
+                    results.append(
+                        {
+                            "user_id": row[0],
+                            "user_name": row[1],
+                            "user_full_name": row[2],
+                        }
+                    )
+                return results
+        except Exception as e:
+            LogPerformance().error(f"Erro ao buscar resumo de usuários: {e}")
+            return [{}]

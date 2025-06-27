@@ -33,6 +33,7 @@ from messages import (
     format_stats_message,
     format_recent_queries_message,
     format_authorized_users_message,
+    format_summary_users_message,
 )
 from config import (
     TELEGRAM_TOKEN,
@@ -62,6 +63,9 @@ class CEPzinho:
         self.app.add_handler(CommandHandler("stats", self.stats_command))
         self.app.add_handler(CommandHandler("recent", self.recent_command))
         self.app.add_handler(CommandHandler("users", self.users_command))
+        self.app.add_handler(
+            CommandHandler("summary_users", self.summary_users_command)
+        )
         self.app.add_handler(CommandHandler("adduser", self.adduser_command))
         self.app.add_handler(CommandHandler("removeuser", self.removeuser_command))
 
@@ -216,6 +220,24 @@ class CEPzinho:
         except Exception as e:
             LogPerformance().error(f"Erro ao buscar estatísticas: {e}")
             await update.message.reply_text("❌ Erro ao buscar estatísticas.")
+
+    async def summary_users_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ):
+        """Handler para o comando /summary"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        try:
+            users = self.db.get_summary_users()
+            response = format_summary_users_message(users)
+            await update.message.reply_text(response)
+        except Exception as e:
+            LogPerformance().error(f"Erro ao buscar resumo de usuários: {e}")
+            await update.message.reply_text("❌ Erro ao buscar resumo de usuários.")
 
     async def recent_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handler para o comando /recent"""

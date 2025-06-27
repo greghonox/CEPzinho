@@ -325,3 +325,14 @@ def format_authorized_users_message(users: list) -> str:
         users_text += f"  📅 {user.get('added_at')}\n\n"
 
     return AUTHORIZED_USERS_MESSAGE.format(users=users_text, count=len(users))
+
+
+def format_summary_users_message(users: list[dict]) -> str:
+    """Formata mensagem de resumo de usuários"""
+    if not users:
+        return "❌ Nenhum usuário encontrado."
+
+    users_text = "Usuarios que mais usaram o bot:\n"
+    for user in users:
+        users_text += f"• **{user.get('user_name', 'N/A')}** ({user.get('user_full_name', 'N/A')}) ID: {user.get('user_id')}\n"
+    return users_text
