@@ -1,0 +1,30 @@
+[project]
+name = "cepzinho"
+version = "0.1.0"
+description = "O Seu Ajudante de Endereços no Telegram! 📍"
+authors = [
+    {name = "greghono@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests (>=2.31.0,<3.0.0)",
+    "python-dotenv (>=1.0.0,<2.0.0)",
+    "python-telegram-bot (<21.0)",
+    "logperformance (>=1.0.1,<2.0.0)"
+]
+
+[tool.poetry]
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+flake8 = "^7.3.0"
+isort = "^6.0.1"
+autopep8 = "^2.3.2"
+mypy = "^1.16.1"
+pylint = "^3.3.7"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
