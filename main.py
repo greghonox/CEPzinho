@@ -64,12 +64,10 @@ class CEPzinho:
         """Handler para o comando /cep"""
         user_id = update.effective_user.id
 
-        # Verifica se foi fornecido um argumento
         if not context.args:
             await update.message.reply_text(CEP_USAGE_MESSAGE.strip())
             return
 
-        # Junta todos os argumentos em uma string
         cep_input = " ".join(context.args)
 
         LogPerformance().info(
@@ -78,7 +76,6 @@ class CEPzinho:
             )
         )
 
-        # Extrai o CEP da mensagem
         cep = self._extract_cep(cep_input)
 
         if not cep:
@@ -86,11 +83,9 @@ class CEPzinho:
             return
 
         try:
-            # Busca informações do CEP
             cep_obj = Cep(cep)
             cep_data = cep_obj.get_cep()
 
-            # Formata e envia a resposta
             response = format_cep_response(cep_data)
             await update.message.reply_text(response)
 
@@ -108,12 +103,10 @@ class CEPzinho:
         """Handler para o comando /rua"""
         user_id = update.effective_user.id
 
-        # Verifica se foi fornecido um argumento
         if not context.args:
             await update.message.reply_text(RUA_USAGE_MESSAGE.strip())
             return
 
-        # Junta todos os argumentos em uma string
         address_input = " ".join(context.args)
 
         LogPerformance().info(
@@ -123,20 +116,17 @@ class CEPzinho:
         )
 
         try:
-            # Extrai informações do endereço
             address_info = self._parse_address(address_input)
 
             if not address_info:
                 await update.message.reply_text(INVALID_ADDRESS_FORMAT_MESSAGE)
                 return
 
-            # Busca CEPs por endereço
             cep_obj = Cep()
             address_data = cep_obj.search_address(
                 address_info["uf"], address_info["cidade"], address_info["logradouro"]
             )
 
-            # Formata e envia a resposta
             response = format_address_response(address_data)
             await update.message.reply_text(response)
 
@@ -154,9 +144,10 @@ class CEPzinho:
         """Handler para consultas inline"""
         query = update.inline_query.query.strip()
         user_id = update.inline_query.from_user.id
+        full_name = update.inline_query.from_user.full_name
+        name = update.inline_query.from_user.name
 
         if not query:
-            # Se não há query, mostra placeholder
             results = [
                 InlineQueryResultArticle(
                     id="placeholder",
@@ -170,11 +161,12 @@ class CEPzinho:
             await update.inline_query.answer(results)
             return
 
-        LogPerformance().info(f"Consulta inline de usuário {user_id}: {query}")
+        LogPerformance().info(
+            f"Consulta inline de usuário {name} {full_name} {user_id}: {query}"
+        )
 
         results = []
 
-        # Verifica se é um CEP
         cep = self._extract_cep(query)
         if cep:
             try:
@@ -182,7 +174,6 @@ class CEPzinho:
                 cep_data = cep_obj.get_cep()
 
                 if not cep_data.get("erro"):
-                    # Formata resultado para CEP
                     title = INLINE_RESULT_TITLE_CEP.format(cep=cep_data.get("cep"))
                     description = INLINE_RESULT_DESCRIPTION_CEP.format(
                         logradouro=cep_data.get("logradouro", "N/A"),
@@ -203,7 +194,6 @@ class CEPzinho:
             except Exception as e:
                 LogPerformance().error(f"Erro na consulta inline CEP: {e}")
 
-        # Verifica se é um endereço
         address_info = self._parse_address(query)
         if address_info:
             try:
@@ -215,8 +205,7 @@ class CEPzinho:
                 )
 
                 if address_data:
-                    # Formata resultado para endereço
-                    for i, addr in enumerate(address_data[:3]):  # Máximo 3 resultados
+                    for i, addr in enumerate(address_data[:3]):
                         title = INLINE_RESULT_TITLE_ADDRESS.format(
                             logradouro=addr.get("logradouro", "N/A")
                         )
@@ -238,7 +227,6 @@ class CEPzinho:
             except Exception as e:
                 LogPerformance().error(f"Erro na consulta inline endereço: {e}")
 
-        # Se não encontrou resultados
         if not results:
             results = [
                 InlineQueryResultArticle(
@@ -255,10 +243,8 @@ class CEPzinho:
 
     def _extract_cep(self, text: str) -> str:
         """Extrai o CEP do texto da mensagem"""
-        # Remove espaços e caracteres especiais
         cep_clean = re.sub(CEP_PATTERN, "", text)
 
-        # Verifica se tem 8 dígitos
         if len(cep_clean) == CEP_LENGTH:
             return cep_clean
 
@@ -266,19 +252,15 @@ class CEPzinho:
 
     def _parse_address(self, text: str) -> dict:
         """Extrai informações do endereço (UF, cidade, logradouro)"""
-        # Implementação simples - pode ser melhorada
         parts = text.split(",")
 
         if len(parts) < 2:
             return None
 
-        # Última parte é a UF
         uf = parts[-1].strip().upper()
 
-        # Penúltima parte é a cidade
         cidade = parts[-2].strip()
 
-        # Resto é o logradouro
         logradouro = ",".join(parts[:-2]).strip()
 
         if not uf or not cidade or not logradouro:

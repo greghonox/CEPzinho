@@ -34,7 +34,7 @@ Com o CEPzinho, você encontra CEPs e endereços completos de forma rápida e de
 
 **3. Modo Inline (Funcionalidade Avançada):**
 
-- Digite `@seu_bot_username` + CEP ou endereço em qualquer chat
+- Digite `@cepzinhobot` + CEP ou endereço em qualquer chat
 - O bot responderá diretamente no chat sem precisar ser adicionado
 - Funciona em grupos, canais e conversas privadas
 
@@ -48,7 +48,7 @@ Com o CEPzinho, você encontra CEPs e endereços completos de forma rápida e de
 /cep 01310 100
 
 # Modo Inline:
-@seu_bot_username 01310-100
+@cepzinhobot 01310-100
 ```
 
 🏠 **Buscar por Endereço:**
@@ -59,7 +59,7 @@ Com o CEPzinho, você encontra CEPs e endereços completos de forma rápida e de
 /rua Praça da Sé, São Paulo, SP
 
 # Modo Inline:
-@seu_bot_username Avenida Paulista, São Paulo, SP
+@cepzinhobot Avenida Paulista, São Paulo, SP
 ```
 
 ---
@@ -125,7 +125,7 @@ poetry run python main.py
 
 1. Envie `/setinline` para @BotFather
 2. Selecione seu bot
-3. Digite o texto que aparecerá quando o usuário digitar @seu_bot_username
+3. Digite o texto que aparecerá quando o usuário digitar @cepzinhobot
 4. Exemplo: "Digite um CEP ou endereço para buscar informações"
 
 ---
@@ -157,7 +157,7 @@ poetry run python main.py
 - **Resposta rápida**: Resultados aparecem instantaneamente
 - **Privacidade**: O bot não fica no histórico do grupo
 - **Flexibilidade**: Funciona em grupos, canais e conversas privadas
-- **Fácil de usar**: Apenas digite @seu_bot_username + consulta
+- **Fácil de usar**: Apenas digite @cepzinhobot + consulta
 
 ---
 

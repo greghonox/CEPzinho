@@ -19,9 +19,16 @@ WELCOME_MESSAGE = """
 
 🔍 **Modo Inline:** Use @seu_bot_username + CEP ou endereço em qualquer chat!
 """
+CONTACT_MESSAGE = """
+Se tiver alguma dúvida, entre em contato comigo no Telegram.
 
-# Mensagem de ajuda
-HELP_MESSAGE = """
+📞 TELEGRAM:
+
+💡 @greghono
+"""
+
+HELP_MESSAGE = (
+    """
 📚 **Comandos disponíveis:**
 
 /start - Inicia o bot
@@ -30,13 +37,13 @@ HELP_MESSAGE = """
 /rua [endereço] - Busca CEP por endereço
 
 📍 **Como usar /cep:**
-/cep 01310-100
-/cep 01310100
-/cep 01310 100
+/cep 13183248
+/cep 36246200
+/cep 36246359
 
 🏠 **Como usar /rua:**
-/rua Avenida Paulista, São Paulo
-/rua Rua das Flores, 123, Centro
+/rua Maria do Carmo Silva,  Santos dumont, MG
+/rua rua maria , santos, MG
 /rua Praça da Sé, São Paulo, SP
 
 🔍 **Modo Inline:**
@@ -53,28 +60,34 @@ Use @seu_bot_username + CEP ou endereço em qualquer chat!
 
 ❓ **Precisa de ajuda?** Entre em contato com o desenvolvedor.
 """
+    + CONTACT_MESSAGE
+)
 
-# Mensagem de formato inválido para CEP
-INVALID_CEP_FORMAT_MESSAGE = """❌ Formato inválido! Envie um CEP válido com 8 dígitos.
+INVALID_CEP_FORMAT_MESSAGE = (
+    """❌ Formato inválido! Envie um CEP válido com 8 dígitos.
 Exemplos: /cep 01310-100, /cep 01310100, /cep 01310 100"""
+    + CONTACT_MESSAGE
+)
 
-# Mensagem de formato inválido para endereço
-INVALID_ADDRESS_FORMAT_MESSAGE = """❌ Formato inválido! Use: /rua [endereço]
+INVALID_ADDRESS_FORMAT_MESSAGE = (
+    """❌ Formato inválido! Use: /rua [endereço]
 Exemplos: 
 • /rua Avenida Paulista, São Paulo
 • /rua Rua das Flores, 123, Centro
 • /rua Praça da Sé, São Paulo, SP"""
+    + CONTACT_MESSAGE
+)
 
-# Mensagem de CEP não encontrado
 CEP_NOT_FOUND_MESSAGE = "❌ CEP não encontrado. Verifique se o número está correto."
 
-# Mensagem de endereço não encontrado
 ADDRESS_NOT_FOUND_MESSAGE = "❌ Endereço não encontrado. Verifique se está correto."
 
-# Mensagem de erro genérico
-ERROR_MESSAGE = "❌ Erro ao buscar informações. Tente novamente mais tarde."
+ERROR_MESSAGE = (
+    "❌ Erro ao buscar informações. Tente novamente mais tarde."
+    + "💡 Se aindanão conseguiu fazer a consulta e quiser chamar o desenvolvedor: "
+    + CONTACT_MESSAGE
+)
 
-# Mensagem de CEP não configurado
 TOKEN_NOT_CONFIGURED_MESSAGE = "❌ Token do Telegram não configurado no arquivo .env"
 
 # Mensagem de uso incorreto do comando /cep

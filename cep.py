@@ -18,7 +18,6 @@ class Cep:
         """Busca CEPs por endereço"""
         LogPerformance().warning(f"Buscando endereço: {logradouro}, {cidade}/{uf}")
 
-        # URL para busca por endereço
         search_url = f"https://viacep.com.br/ws/{uf}/{cidade}/{logradouro}/json/"
 
         response = get(search_url)

@@ -5,23 +5,17 @@ Configurações do bot CEPzinho
 import os
 from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente
 load_dotenv()
 
-# Configurações do Telegram
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
-# Configurações da API de CEP
 CEP_API_URL = "https://viacep.com.br/ws/{cep}/json/"
 
-# Configurações de logging
 LOG_LEVEL = "INFO"
 
-# Configurações de validação
 CEP_LENGTH = 8
 CEP_PATTERN = r"[^\d]"
 
-# Mensagens de log
 LOG_MESSAGES = {
     "start": "Iniciando o programa",
     "bot_started": "Bot iniciado e aguardando mensagens...",
