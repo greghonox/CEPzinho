@@ -9,9 +9,9 @@ WELCOME_MESSAGE = """
 📍 Para buscar informações de um CEP, use o comando /cep seguido do número.
 
 📝 Exemplos:
-• /cep 01310-100
-• /cep 01310100
-• /cep 01310 100
+• /cep 13183248
+• /cep 36246200
+• /cep 36246359
 
 🏠 Para buscar CEP por endereço, use /rua seguido do endereço.
 
@@ -70,10 +70,10 @@ Exemplos: /cep 01310-100, /cep 01310100, /cep 01310 100"""
 )
 
 INVALID_ADDRESS_FORMAT_MESSAGE = (
-    """❌ Formato inválido! Use: /rua [endereço]
+    """❌ Formato inválido! Use: /rua nome da rua, cidade, estado
 Exemplos: 
-• /rua Avenida Paulista, São Paulo
-• /rua Rua das Flores, 123, Centro
+• /rua Maria do Carmo Silva, Santos dumont, MG
+• /rua rua maria , santos, MG
 • /rua Praça da Sé, São Paulo, SP"""
     + CONTACT_MESSAGE
 )
@@ -96,9 +96,9 @@ CEP_USAGE_MESSAGE = """📍 **Como usar o comando /cep:**
 Envie: /cep [número do CEP]
 
 📝 Exemplos:
-• /cep 01310-100
-• /cep 01310100
-• /cep 01310 100
+• /cep 13183248
+• /cep 36246200
+• /cep 36246359
 
 🔍 **Informações retornadas:**
 • CEP formatado
