@@ -135,6 +135,70 @@ INLINE_RESULT_DESCRIPTION_CEP = "{logradouro}, {bairro} - {cidade}/{uf}"
 INLINE_RESULT_DESCRIPTION_ADDRESS = "CEP: {cep} - {cidade}/{uf}"
 INLINE_NO_RESULTS = "Nenhum resultado encontrado"
 
+# Mensagens para comandos de administração
+NOT_AUTHORIZED_MESSAGE = "❌ Você não está autorizado a usar este comando."
+ADMIN_HELP_MESSAGE = """
+🔧 **Comandos de Administração:**
+
+/stats - Mostra estatísticas do bot
+/recent - Mostra consultas recentes
+/users - Lista usuários autorizados
+/adduser [user_id] - Adiciona usuário autorizado
+/removeuser [user_id] - Remove usuário autorizado
+
+📊 **Estatísticas disponíveis:**
+• Total de consultas
+• Consultas bem-sucedidas
+• Usuários únicos
+• Consultas por tipo
+"""
+
+STATS_MESSAGE = """
+📊 **Estatísticas dos últimos {days} dias:**
+
+🔍 **Consultas:**
+• Total: {total_queries}
+• Bem-sucedidas: {successful_queries}
+• Falharam: {failed_queries}
+• Taxa de sucesso: {success_rate:.1f}%
+
+👥 **Usuários:**
+• Únicos: {unique_users}
+
+📈 **Por tipo:**
+{query_types}
+
+📅 Período: {days} dias
+"""
+
+RECENT_QUERIES_MESSAGE = """
+🔍 **Consultas Recentes:**
+
+{queries}
+
+📝 Mostrando as {limit} consultas mais recentes
+"""
+
+USER_QUERIES_MESSAGE = """
+👤 **Consultas do Usuário {user_id}:**
+
+{queries}
+
+📝 Mostrando as {limit} consultas mais recentes
+"""
+
+AUTHORIZED_USERS_MESSAGE = """
+👥 **Usuários Autorizados:**
+
+{users}
+
+📝 Total: {count} usuários autorizados
+"""
+
+USER_ADDED_MESSAGE = "✅ Usuário {user_id} adicionado com sucesso!"
+USER_REMOVED_MESSAGE = "✅ Usuário {user_id} removido com sucesso!"
+USER_NOT_FOUND_MESSAGE = "❌ Usuário {user_id} não encontrado."
+
 
 def format_cep_response(cep_data: dict) -> str:
     """Formata a resposta da API do CEP"""
@@ -204,3 +268,60 @@ def format_inline_address_result(address_data: list) -> str:
         result += f"📝 *+{len(address_data) - 3} resultados*"
 
     return result.strip()
+
+
+def format_stats_message(stats: dict) -> str:
+    """Formata mensagem de estatísticas"""
+    if not stats:
+        return "❌ Erro ao buscar estatísticas."
+
+    success_rate = 0
+    if stats.get("total_queries", 0) > 0:
+        success_rate = (
+            stats.get("successful_queries", 0) / stats.get("total_queries", 1)
+        ) * 100
+
+    query_types_text = ""
+    for query_type, count in stats.get("query_types", {}).items():
+        query_types_text += f"• {query_type}: {count}\n"
+
+    if not query_types_text:
+        query_types_text = "• Nenhuma consulta registrada\n"
+
+    return STATS_MESSAGE.format(
+        days=stats.get("period_days", 7),
+        total_queries=stats.get("total_queries", 0),
+        successful_queries=stats.get("successful_queries", 0),
+        failed_queries=stats.get("failed_queries", 0),
+        success_rate=success_rate,
+        unique_users=stats.get("unique_users", 0),
+        query_types=query_types_text,
+    )
+
+
+def format_recent_queries_message(queries: list, limit: int = 50) -> str:
+    """Formata mensagem de consultas recentes"""
+    if not queries:
+        return "❌ Nenhuma consulta encontrada."
+
+    queries_text = ""
+    for query in queries[:limit]:
+        status = "✅" if query.get("success") else "❌"
+        queries_text += f"{status} **{query.get('user_name', 'N/A')}** - {query.get('query_type')}: {query.get('query_text')}\n"
+        queries_text += f"   📅 {query.get('created_at')}\n\n"
+
+    return RECENT_QUERIES_MESSAGE.format(queries=queries_text, limit=limit)
+
+
+def format_authorized_users_message(users: list) -> str:
+    """Formata mensagem de usuários autorizados"""
+    if not users:
+        return "❌ Nenhum usuário autorizado encontrado."
+
+    users_text = ""
+    for user in users:
+        users_text += f"• **{user.get('user_name', 'N/A')}** ({user.get('user_full_name', 'N/A')})\n"
+        users_text += f"  ID: {user.get('user_id')} | Role: {user.get('role')}\n"
+        users_text += f"  📅 {user.get('added_at')}\n\n"
+
+    return AUTHORIZED_USERS_MESSAGE.format(users=users_text, count=len(users))

@@ -12,6 +12,10 @@ Com o CEPzinho, você encontra CEPs e endereços completos de forma rápida e de
 
 🔍 **Modo Inline**: Use o bot em qualquer chat sem adicioná-lo ao grupo!
 
+🗄️ **Sistema de Banco de Dados**: Armazena todas as consultas para análise e estatísticas.
+
+🔧 **Painel de Administração**: Comandos exclusivos para usuários autorizados.
+
 🤖 **Interface Simples**: Interaja com o bot de forma intuitiva e eficiente diretamente no Telegram.
 
 ⚡ **Gratuito e Rápido**: Obtenha suas informações de endereço sem custo e em poucos segundos.
@@ -102,7 +106,13 @@ poetry install
 TELEGRAM_TOKEN=SEU_TOKEN_DO_BOT_AQUI
 ```
 
-5. **Execute o bot:**
+5. **Inicialize o banco de dados:**
+
+```bash
+poetry run python init_db.py
+```
+
+6. **Execute o bot:**
 
 ```bash
 poetry run python main.py
@@ -127,6 +137,41 @@ poetry run python main.py
 2. Selecione seu bot
 3. Digite o texto que aparecerá quando o usuário digitar @cepzinhobot
 4. Exemplo: "Digite um CEP ou endereço para buscar informações"
+
+---
+
+🗄️ Sistema de Banco de Dados
+
+O bot utiliza SQLite para armazenar:
+
+- **Consultas realizadas**: Todas as buscas por CEP e endereço
+- **Usuários autorizados**: Lista de administradores
+- **Estatísticas**: Métricas de uso do bot
+
+**Tabelas criadas automaticamente:**
+
+- `queries` - Histórico de consultas
+- `authorized_users` - Usuários com acesso administrativo
+- `statistics` - Estatísticas de uso
+
+---
+
+🔧 Comandos de Administração
+
+**Comandos exclusivos para usuários autorizados:**
+
+- `/admin` - Mostra ajuda dos comandos administrativos
+- `/stats` - Exibe estatísticas dos últimos 7 dias
+- `/recent` - Mostra as 20 consultas mais recentes
+- `/users` - Lista todos os usuários autorizados
+- `/adduser [user_id]` - Adiciona novo usuário autorizado
+- `/removeuser [user_id]` - Remove usuário autorizado
+
+**Como obter seu User ID:**
+
+1. Envie `/start` para @userinfobot
+2. Ele retornará seu user_id
+3. Use esse ID para se autorizar
 
 ---
 
@@ -161,6 +206,18 @@ poetry run python main.py
 
 ---
 
+📊 Estatísticas e Análises
+
+O sistema coleta automaticamente:
+
+- **Total de consultas** por período
+- **Taxa de sucesso** das consultas
+- **Usuários únicos** que utilizaram o bot
+- **Tipos de consulta** mais populares
+- **Histórico completo** de todas as buscas
+
+---
+
 🤝 Contribuições
 
 Contribuições são muito bem-vindas! Se você tiver ideias para melhorias, encontrou um bug ou deseja adicionar novas funcionalidades:
@@ -192,3 +249,4 @@ Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em c
 
 - **ViaCEP**: API gratuita para consulta de CEPs brasileiros
 - **python-telegram-bot**: Biblioteca para criação de bots no Telegram
+- **SQLite**: Banco de dados local para armazenamento

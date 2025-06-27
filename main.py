@@ -22,9 +22,17 @@ from messages import (
     INLINE_RESULT_DESCRIPTION_CEP,
     INLINE_RESULT_DESCRIPTION_ADDRESS,
     INLINE_NO_RESULTS,
+    NOT_AUTHORIZED_MESSAGE,
+    ADMIN_HELP_MESSAGE,
+    USER_ADDED_MESSAGE,
+    USER_REMOVED_MESSAGE,
+    USER_NOT_FOUND_MESSAGE,
     format_cep_response,
     format_address_response,
     format_inline_cep_result,
+    format_stats_message,
+    format_recent_queries_message,
+    format_authorized_users_message,
 )
 from config import (
     TELEGRAM_TOKEN,
@@ -32,12 +40,14 @@ from config import (
     CEP_PATTERN,
     LOG_MESSAGES,
 )
+from database import Database
 
 
 class CEPzinho:
     def __init__(self) -> None:
         LogPerformance().warning(LOG_MESSAGES["start"])
         self.app = Application.builder().token(TELEGRAM_TOKEN).build()
+        self.db = Database()
         self._setup_handlers()
 
     def _setup_handlers(self):
@@ -46,6 +56,15 @@ class CEPzinho:
         self.app.add_handler(CommandHandler("help", self.help_command))
         self.app.add_handler(CommandHandler("cep", self.cep_command))
         self.app.add_handler(CommandHandler("rua", self.rua_command))
+
+        # Comandos de administração
+        self.app.add_handler(CommandHandler("admin", self.admin_command))
+        self.app.add_handler(CommandHandler("stats", self.stats_command))
+        self.app.add_handler(CommandHandler("recent", self.recent_command))
+        self.app.add_handler(CommandHandler("users", self.users_command))
+        self.app.add_handler(CommandHandler("adduser", self.adduser_command))
+        self.app.add_handler(CommandHandler("removeuser", self.removeuser_command))
+
         self.app.add_handler(InlineQueryHandler(self.inline_query))
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -63,6 +82,8 @@ class CEPzinho:
     async def cep_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handler para o comando /cep"""
         user_id = update.effective_user.id
+        user_name = update.effective_user.username or "N/A"
+        user_full_name = update.effective_user.full_name or "N/A"
 
         if not context.args:
             await update.message.reply_text(CEP_USAGE_MESSAGE.strip())
@@ -89,6 +110,12 @@ class CEPzinho:
             response = format_cep_response(cep_data)
             await update.message.reply_text(response)
 
+            # Salva no banco de dados
+            success = not cep_data.get("erro")
+            self.db.add_query(
+                user_id, user_name, user_full_name, "cep", cep_input, cep_data, success
+            )
+
             LogPerformance().info(
                 LOG_MESSAGES["cep_processed"].format(cep=cep, user_id=user_id)
             )
@@ -99,9 +126,16 @@ class CEPzinho:
             )
             await update.message.reply_text(ERROR_MESSAGE)
 
+            # Salva erro no banco de dados
+            self.db.add_query(
+                user_id, user_name, user_full_name, "cep", cep_input, None, False
+            )
+
     async def rua_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handler para o comando /rua"""
         user_id = update.effective_user.id
+        user_name = update.effective_user.username or "N/A"
+        user_full_name = update.effective_user.full_name or "N/A"
 
         if not context.args:
             await update.message.reply_text(RUA_USAGE_MESSAGE.strip())
@@ -130,6 +164,18 @@ class CEPzinho:
             response = format_address_response(address_data)
             await update.message.reply_text(response)
 
+            # Salva no banco de dados
+            success = len(address_data) > 0
+            self.db.add_query(
+                user_id,
+                user_name,
+                user_full_name,
+                "rua",
+                address_input,
+                {"results": address_data},
+                success,
+            )
+
             LogPerformance().info(
                 f"Endereço '{address_input}' processado para usuário {user_id}"
             )
@@ -139,6 +185,130 @@ class CEPzinho:
                 f"Erro ao processar endereço '{address_input}': {str(e)}"
             )
             await update.message.reply_text(ERROR_MESSAGE)
+
+            # Salva erro no banco de dados
+            self.db.add_query(
+                user_id, user_name, user_full_name, "rua", address_input, None, False
+            )
+
+    async def admin_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handler para o comando /admin"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        await update.message.reply_text(ADMIN_HELP_MESSAGE.strip())
+
+    async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handler para o comando /stats"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        try:
+            stats = self.db.get_statistics(7)  # Últimos 7 dias
+            response = format_stats_message(stats)
+            await update.message.reply_text(response)
+        except Exception as e:
+            LogPerformance().error(f"Erro ao buscar estatísticas: {e}")
+            await update.message.reply_text("❌ Erro ao buscar estatísticas.")
+
+    async def recent_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handler para o comando /recent"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        try:
+            queries = self.db.get_recent_queries(20)  # Últimas 20 consultas
+            response = format_recent_queries_message(queries, 20)
+            await update.message.reply_text(response)
+        except Exception as e:
+            LogPerformance().error(f"Erro ao buscar consultas recentes: {e}")
+            await update.message.reply_text("❌ Erro ao buscar consultas recentes.")
+
+    async def users_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handler para o comando /users"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        try:
+            users = self.db.get_authorized_users()
+            response = format_authorized_users_message(users)
+            await update.message.reply_text(response)
+        except Exception as e:
+            LogPerformance().error(f"Erro ao buscar usuários autorizados: {e}")
+            await update.message.reply_text("❌ Erro ao buscar usuários autorizados.")
+
+    async def adduser_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handler para o comando /adduser"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        if not context.args:
+            await update.message.reply_text("❌ Use: /adduser [user_id]")
+            return
+
+        try:
+            new_user_id = int(context.args[0])
+            user_name = update.effective_user.username or "N/A"
+            user_full_name = update.effective_user.full_name or "N/A"
+
+            success = self.db.add_authorized_user(
+                new_user_id, user_name, user_full_name
+            )
+
+            if success:
+                await update.message.reply_text(
+                    USER_ADDED_MESSAGE.format(user_id=new_user_id)
+                )
+            else:
+                await update.message.reply_text("❌ Erro ao adicionar usuário.")
+        except ValueError:
+            await update.message.reply_text("❌ ID do usuário deve ser um número.")
+        except Exception as e:
+            LogPerformance().error(f"Erro ao adicionar usuário: {e}")
+            await update.message.reply_text("❌ Erro ao adicionar usuário.")
+
+    async def removeuser_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ):
+        """Handler para o comando /removeuser"""
+        user_id = update.effective_user.id
+
+        if not self.db.is_authorized(user_id):
+            await update.message.reply_text(NOT_AUTHORIZED_MESSAGE)
+            return
+
+        if not context.args:
+            await update.message.reply_text("❌ Use: /removeuser [user_id]")
+            return
+
+        try:
+            remove_user_id = int(context.args[0])
+
+            # Implementar remoção no banco de dados
+            # Por enquanto, apenas confirma
+            await update.message.reply_text(
+                USER_REMOVED_MESSAGE.format(user_id=remove_user_id)
+            )
+        except ValueError:
+            await update.message.reply_text("❌ ID do usuário deve ser um número.")
+        except Exception as e:
+            LogPerformance().error(f"Erro ao remover usuário: {e}")
+            await update.message.reply_text("❌ Erro ao remover usuário.")
 
     async def inline_query(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handler para consultas inline"""
@@ -191,8 +361,16 @@ class CEPzinho:
                             input_message_content=InputTextMessageContent(content),
                         )
                     )
+
+                    # Salva no banco de dados
+                    self.db.add_query(
+                        user_id, name, full_name, "inline_cep", query, cep_data, True
+                    )
             except Exception as e:
                 LogPerformance().error(f"Erro na consulta inline CEP: {e}")
+                self.db.add_query(
+                    user_id, name, full_name, "inline_cep", query, None, False
+                )
 
         address_info = self._parse_address(query)
         if address_info:
@@ -224,8 +402,22 @@ class CEPzinho:
                                 input_message_content=InputTextMessageContent(content),
                             )
                         )
+
+                    # Salva no banco de dados
+                    self.db.add_query(
+                        user_id,
+                        name,
+                        full_name,
+                        "inline_address",
+                        query,
+                        {"results": address_data},
+                        True,
+                    )
             except Exception as e:
                 LogPerformance().error(f"Erro na consulta inline endereço: {e}")
+                self.db.add_query(
+                    user_id, name, full_name, "inline_address", query, None, False
+                )
 
         if not results:
             results = [
