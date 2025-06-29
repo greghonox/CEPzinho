@@ -329,5 +329,5 @@ def format_summary_users_message(users: list[dict]) -> str:
 
     users_text = "Usuarios que mais usaram o bot:\n"
     for user in users:
-        users_text += f"🤠 @{user.get('user_name', 'N/A')} ({user.get('user_full_name', 'N/A')}) ID: {user.get('user_id')}\n"
+        users_text += f"👨🏿‍🔧 {user.get('user_name', 'N/A')} ({user.get('user_full_name', 'N/A')}) ID: {user.get('user_id')}\n"
     return users_text
