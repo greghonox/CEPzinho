@@ -2,7 +2,6 @@
 Mensagens padrões do bot CEPzinho
 """
 
-# Mensagem de boas-vindas
 WELCOME_MESSAGE = """
 🤖 Olá! Eu sou o CEPzinho, seu ajudante de endereços!
 
@@ -17,7 +16,7 @@ WELCOME_MESSAGE = """
 
 💡 Use /help para ver todos os comandos disponíveis.
 
-🔍 **Modo Inline:** Use @seu_bot_username + CEP ou endereço em qualquer chat!
+🔍 **Modo Inline:** Use @cepzinhobot + CEP ou endereço em qualquer chat!
 """
 CONTACT_MESSAGE = """
 Se tiver alguma dúvida, entre em contato comigo no Telegram.
@@ -47,7 +46,7 @@ HELP_MESSAGE = (
 /rua Praça da Sé, São Paulo, SP
 
 🔍 **Modo Inline:**
-Use @seu_bot_username + CEP ou endereço em qualquer chat!
+Use @cepzinhobot + CEP ou endereço em qualquer chat!
 
 🔍 **Informações retornadas:**
 • CEP
@@ -90,7 +89,6 @@ ERROR_MESSAGE = (
 
 TOKEN_NOT_CONFIGURED_MESSAGE = "❌ Token do Telegram não configurado no arquivo .env"
 
-# Mensagem de uso incorreto do comando /cep
 CEP_USAGE_MESSAGE = """📍 **Como usar o comando /cep:**
 
 Envie: /cep [número do CEP]
@@ -110,7 +108,6 @@ Envie: /cep [número do CEP]
 • Código IBGE
 • Código SIAFI"""
 
-# Mensagem de uso incorreto do comando /rua
 RUA_USAGE_MESSAGE = """🏠 **Como usar o comando /rua:**
 
 Envie: /rua [endereço completo]
@@ -127,7 +124,6 @@ Envie: /rua [endereço completo]
 • Cidade
 • Estado"""
 
-# Mensagens para modo inline
 INLINE_QUERY_PLACEHOLDER = "Digite um CEP ou endereço..."
 INLINE_RESULT_TITLE_CEP = "📍 CEP {cep}"
 INLINE_RESULT_TITLE_ADDRESS = "🏠 {logradouro}"
@@ -135,7 +131,6 @@ INLINE_RESULT_DESCRIPTION_CEP = "{logradouro}, {bairro} - {cidade}/{uf}"
 INLINE_RESULT_DESCRIPTION_ADDRESS = "CEP: {cep} - {cidade}/{uf}"
 INLINE_NO_RESULTS = "Nenhum resultado encontrado"
 
-# Mensagens para comandos de administração
 NOT_AUTHORIZED_MESSAGE = "❌ Você não está autorizado a usar este comando."
 ADMIN_HELP_MESSAGE = """
 🔧 **Comandos de Administração:**
@@ -172,7 +167,7 @@ STATS_MESSAGE = """
 """
 
 RECENT_QUERIES_MESSAGE = """
-🔍 **Consultas Recentes:**
+🔍 Consultas Recentes:
 
 {queries}
 
@@ -286,7 +281,7 @@ def format_stats_message(stats: dict) -> str:
         query_types_text += f"• {query_type}: {count}\n"
 
     if not query_types_text:
-        query_types_text = "• Nenhuma consulta registrada\n"
+        query_types_text = "👮🏿 Nenhuma consulta registrada\n"
 
     return STATS_MESSAGE.format(
         days=stats.get("period_days", 7),
@@ -334,5 +329,5 @@ def format_summary_users_message(users: list[dict]) -> str:
 
     users_text = "Usuarios que mais usaram o bot:\n"
     for user in users:
-        users_text += f"• **{user.get('user_name', 'N/A')}** ({user.get('user_full_name', 'N/A')}) ID: {user.get('user_id')}\n"
+        users_text += f"🤠 @{user.get('user_name', 'N/A')} ({user.get('user_full_name', 'N/A')}) ID: {user.get('user_id')}\n"
     return users_text

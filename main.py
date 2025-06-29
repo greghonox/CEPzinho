@@ -58,7 +58,6 @@ class CEPzinho:
         self.app.add_handler(CommandHandler("cep", self.cep_command))
         self.app.add_handler(CommandHandler("rua", self.rua_command))
 
-        # Comandos de administração
         self.app.add_handler(CommandHandler("admin", self.admin_command))
         self.app.add_handler(CommandHandler("stats", self.stats_command))
         self.app.add_handler(CommandHandler("recent", self.recent_command))
@@ -168,7 +167,6 @@ class CEPzinho:
             response = format_address_response(address_data)
             await update.message.reply_text(response)
 
-            # Salva no banco de dados
             success = len(address_data) > 0
             self.db.add_query(
                 user_id,
@@ -190,7 +188,6 @@ class CEPzinho:
             )
             await update.message.reply_text(ERROR_MESSAGE)
 
-            # Salva erro no banco de dados
             self.db.add_query(
                 user_id, user_name, user_full_name, "rua", address_input, None, False
             )
@@ -384,7 +381,6 @@ class CEPzinho:
                         )
                     )
 
-                    # Salva no banco de dados
                     self.db.add_query(
                         user_id, name, full_name, "inline_cep", query, cep_data, True
                     )
@@ -425,7 +421,6 @@ class CEPzinho:
                             )
                         )
 
-                    # Salva no banco de dados
                     self.db.add_query(
                         user_id,
                         name,
@@ -482,7 +477,7 @@ class CEPzinho:
 
         return {"uf": uf, "cidade": cidade, "logradouro": logradouro}
 
-    def run(self):
+    def run(self) -> None:
         """Inicia o bot"""
         LogPerformance().info(LOG_MESSAGES["bot_started"])
         self.app.run_polling(allowed_updates=Update.ALL_TYPES)
